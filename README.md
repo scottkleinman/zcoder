@@ -28,6 +28,7 @@ zcoder.py imports the Python os, fnmatch, and codex libraries.
 
 ## Citation and Contact Information
 Kleinman, Scott (July 30, 2014). ZCoder. v. 1.0. https://github.com/scottkleinman/zcoder.
+
 Contact: scott.kleinman@csun.edu
 
 ## License Information
