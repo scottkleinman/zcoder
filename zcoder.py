@@ -32,7 +32,7 @@ replacements = {'\u':'qq', '1':'zonez', '2':'ztwoz', '3':'zthrz', '4':'zfourz',
 '5':'zfivez', '6':'zsixz', '7':'zsevenz', '8':'zeightz', '9':'zninez', '0':'zqeroz'}
 
 # Python library imports
-import os, fnmatch, codecs
+import os, fnmatch, codecs, re
 
 # Z-Encoder Function (Important: output files contain escaped line breaks)
 def z_encode(directory, replacements, filePattern):
@@ -43,6 +43,10 @@ def z_encode(directory, replacements, filePattern):
             filepath = os.path.join(path, filename)
             with codecs.open(filepath, 'r', encoding='utf-8') as f:
                 s = f.read()
+            # Small routine to remove whitespace and encode as Unicode escapes
+            pattern = re.compile(r'\s+')
+            s = re.sub(pattern, ' ', s)
+            s = s.encode('unicode-escape')
             # Replace the Unicode escapes with z-code
             for find, replace in replacements.iteritems():
                 s = s.replace(find, replace)
@@ -54,7 +58,7 @@ def z_encode(directory, replacements, filePattern):
                 os.mkdir(encodedpath)
             # Write the z-encoded file
             with open(outfilepath, "w") as f:
-                f.write(s.encode('unicode-escape'))
+                f.write(s)
 
 # Z-Decoder Function (Important: output files contain escaped line breaks)
 def z_decode(directory, replacements, filePattern):
