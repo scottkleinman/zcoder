@@ -2,101 +2,114 @@
 # Title: zcoder.py                                                  #
 # Author: Scott Kleinman                                            #
 # Contact: scott.kleinman@csun.edu                                  #
-# Date: July 30, 2014                                               #
-# Version: 1.01                                                     #
+# Date: March 20, 2018                                              #
+# Version: 2.0                                                      #
 # This work is licensed under a Creative Commons Attribution-       #
 # NonCommercial-ShareAlike 4.0 International License:               #
 # http://creativecommons.org/licenses/by-nc-sa/4.0/                 #
-# See bottom of code for use.                                       #
 #####################################################################
 
 #####################################################################
 # Encodes Unicode .txt files as Z-Code for use with tools that      #
 # cannot process the Unicode and decodes Z-code back to Unicode.    #
 #                                                                   #
-# Works with all files in directory indicated under Configuration,  #
-# including files in subdirectories. Creates equivalent directory   #
-# structure for output. To decode z-encoded files not created by    #
-# this tool, place them in the encodeddir folder.                   #
+# Run with the following command:                                   #
 #                                                                   #
-# See the bottom of code for commands to call the encoding and      #
-# decoding functions.                                               #
+# python zcode.py encode SOURCE_DIR OUTPUT_DIR                      #
+#                                                                   #
+#                   or                                              #
+#                                                                   #
+# python zcode.py decode SOURCE_DIR OUTPUT_DIR                      #
+#                                                                   #
+# SOURCE_DIR should be the path to the directory containing your    #
+#     source files.                                                 #
+# OUTPUT_DIR should be the path to the directory where you want     #
+#     to save your encoded/decoded files.                           #
 #####################################################################
 
-# Configuration -- Enter the source folder here without trailing slash
-sourcedir = 'C:\Users\Confucius\Documents\chinese'
-encodeddir = sourcedir+'-encoded'
-decodeddir = sourcedir+'-decoded'
-
-# Global replacement dictionaries
-encoding_replacements = {
-    '\u':'qq', '1':'zonez', '2':'ztwoz',
-    '3':'zthrz', '4':'zfourz', '5':'zfivez',
-    '6':'zsixz', '7':'zsevenz', '8':'zeightz',
-    '9':'zninez', '0':'zqeroz'
-}
-
-decoding_replacements = {
-    b'qq': b'\\u', b'zonez': b'1', b'ztwoz': b'2',
-    b'zthrz': b'3', b'zfourz': b'4', b'zfivez': b'5',
-    b'zsixz': b'6', b'zsevenz': b'7', b'zeightz': b'8',
-    b'zninez': b'9', b'zqeroz': b'0'
-}
-
 # Python library imports
-import os, fnmatch, codecs, re
+import os, fnmatch, re
+import fire
 
 # Z-Encoder Function (Important: output files contain escaped line breaks)
-def z_encode(directory, encoding_replacements, filePattern):
-    print('Encoding...')
+def z_encode(source, output):
+    # Set replacements
+    replacements = {
+        b'\\u': b'qq', b'1': b'zonez', b'2': b'ztwoz',
+        b'3': b'zthrz', b'4': b'zfourz', b'5': b'zfivez',
+        b'6': b'zsixz', b'7': b'zsevenz', b'8': b'zeightz',
+        b'9': b'zninez', b'0': b'zqeroz'
+    }
+
     # Walk though the directories
-    for path, dirs, files in os.walk(os.path.abspath(directory)):
+    for path, dirs, files in os.walk(os.path.abspath(source)):
         # Read each file
-        for filename in fnmatch.filter(files, filePattern):
+        for filename in fnmatch.filter(files, '*.txt'):
+            print('Encoding ' + filename + '...')
             filepath = os.path.join(path, filename)
-            with codecs.open(filepath, 'r', encoding='utf-8') as f:
-                s = f.read()
-            # Small routine to remove whitespace and encode as Unicode escapes
-            pattern = re.compile(r'\s+')
-            s = re.sub(pattern, ' ', s)
-            s = s.encode('unicode-escape')
-            # Replace the Unicode escapes with z-code
-            for find, replace in replacements.iteritems():
-                s = s.replace(find, replace)
+            with open(filepath, 'rb') as f:
+                text = f.read().rstrip()  # rstrip to remove trailing spaces
+                decoded = text.decode('unicode-escape').encode('latin1').decode('utf-8')
+                encoded = decoded.encode('unicode-escape')
+                # Replace the Unicode escapes with z-code
+                for find, replace in replacements.items():
+                    encoded = encoded.replace(find, replace)
             # Create a new output path
-            encodedpath = path.replace(sourcedir, encodeddir)
-            outfilepath = os.path.join(encodedpath, filename)
-            # Make sure any subfolders exist
-            if not os.path.isdir(encodedpath):
-                os.mkdir(encodedpath)
+            outpath = os.path.join(output, filename)
             # Write the z-encoded file
-            with open(outfilepath, "w") as f:
-                f.write(s)
+            with open(outpath, 'wb') as f:
+                f.write(encoded)
+    print('Done!')
+    
+# Z-Encoder Function (Important: output files contain escaped line breaks)
+def z_decode(source, output):
+    # Set replacements
+    replacements = {
+        b'qq': b'\\u', b'zonez': b'1', b'ztwoz': b'2',
+        b'zthrz': b'3', b'zfourz': b'4', b'zfivez': b'5',
+        b'zsixz': b'6', b'zsevenz': b'7', b'zeightz': b'8',
+        b'zninez': b'9', b'zqeroz': b'0'
+    }
 
-# Z-Decoder Function (Important: output files contain escaped line breaks)
-def z_decode(directory, replacements, filePattern):
     # Walk though the directories
-    for path, dirs, files in os.walk(os.path.abspath(directory)):
+    for path, dirs, files in os.walk(os.path.abspath(source)):
         # Read each file
-        for filename in fnmatch.filter(files, filePattern):
+        for filename in fnmatch.filter(files, '*.txt'):
+            print('Decoding ' + filename + '...')
             filepath = os.path.join(path, filename)
-            with codecs.open(filepath, 'r', encoding='utf-8') as f:
-                s = f.read()
-            # Replace the z-code with Unicode escapes
-            for replace, find in replacements.iteritems():
-                s = s.replace(find, replace)
+            with open(filepath, 'rb') as f:
+                text = f.read().rstrip()  # rstrip to remove trailing spaces
+                # Replace the z-code with Unicode escapes
+                for find, replace in replacements.items():
+                    text = text.replace(find, replace)
+                # Convert back to Unicode
+                decoded = text.decode('unicode-escape')
             # Create a new output path
-            decodedpath = path.replace(encodeddir, decodeddir)
-            outfilepath = os.path.join(decodedpath, filename)
-            # Make sure any subfolders exist
-            if not os.path.isdir(decodedpath):
-                os.mkdir(decodedpath)
-            s = s.decode('unicode-escape')
-            # Write the de-encoded file
-            with codecs.open(outfilepath, "w", encoding='utf-8') as f:
-                f.write(s)
+            outpath = os.path.join(output, filename)
+            # Write the Unicode file
+            with open(outpath, 'wb') as f:
+                f.write(decoded.encode('utf-8'))
+    print('Done!')
 
-# Use: Run the first command to encode Unicode as z-code.
-# Run the second to convert z-encoded files to Unicode.
-z_encode(sourcedir, replacements, "*.txt") # Uncomment to z-encode texts
-#z_decode(encodeddir, replacements, "*.txt") # Uncomment to decode z-encoded texts
+def execute(*items):
+    try:
+        assert len(items) == 3
+        action = items[0]
+        source = items[1]
+        output = items[2]
+        if action == "encode":
+            z_encode(source, output)
+        else:
+            z_decode(source, output)
+    except:
+        help = """
+        Your command has the wrong number of arguments.
+        Use the format "python zcode.py ACTION SOURCE_DIR OUTPUT_DIR".
+        ACTION should be "encode" or "decode".
+        SOURCE_DIR should be a path the source directory for your texts.
+        OUTPUT_DIR should be a path to the directory where you wish to save your encoded/decoded texts.
+        """
+        print(help)
+
+if __name__ == '__main__':
+    fire.Fire(execute)
