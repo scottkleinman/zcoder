@@ -37,9 +37,11 @@ Of course, you would not actually want to decode the same files from the `encode
 A sample folder with two Chinese texts is included for testing.
 
 ## Citation and Contact Information
+
 Kleinman, Scott (March 20, 2018). ZCoder. v. 2.0. https://github.com/scottkleinman/zcoder.
 
 Contact: scott.kleinman@csun.edu
 
 ## License Information
+
 This work is licensed under a [http://creativecommons.org/licenses/by-nc-sa/4.0/](Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License).
