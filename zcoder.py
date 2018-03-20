@@ -2,7 +2,8 @@
 # Title: zcoder.py                                                  #
 # Author: Scott Kleinman                                            #
 # Contact: scott.kleinman@csun.edu                                  #
-# Date July 30, 2014                                                #
+# Date: July 30, 2014                                               #
+# Version: 1.01                                                     #
 # This work is licensed under a Creative Commons Attribution-       #
 # NonCommercial-ShareAlike 4.0 International License:               #
 # http://creativecommons.org/licenses/by-nc-sa/4.0/                 #
@@ -27,15 +28,27 @@ sourcedir = 'C:\Users\Confucius\Documents\chinese'
 encodeddir = sourcedir+'-encoded'
 decodeddir = sourcedir+'-decoded'
 
-# Global replacement dictionary
-replacements = {'\u':'qq', '1':'zonez', '2':'ztwoz', '3':'zthrz', '4':'zfourz', 
-'5':'zfivez', '6':'zsixz', '7':'zsevenz', '8':'zeightz', '9':'zninez', '0':'zqeroz'}
+# Global replacement dictionaries
+encoding_replacements = {
+    '\u':'qq', '1':'zonez', '2':'ztwoz',
+    '3':'zthrz', '4':'zfourz', '5':'zfivez',
+    '6':'zsixz', '7':'zsevenz', '8':'zeightz',
+    '9':'zninez', '0':'zqeroz'
+}
+
+decoding_replacements = {
+    b'qq': b'\\u', b'zonez': b'1', b'ztwoz': b'2',
+    b'zthrz': b'3', b'zfourz': b'4', b'zfivez': b'5',
+    b'zsixz': b'6', b'zsevenz': b'7', b'zeightz': b'8',
+    b'zninez': b'9', b'zqeroz': b'0'
+}
 
 # Python library imports
 import os, fnmatch, codecs, re
 
 # Z-Encoder Function (Important: output files contain escaped line breaks)
-def z_encode(directory, replacements, filePattern):
+def z_encode(directory, encoding_replacements, filePattern):
+    print('Encoding...')
     # Walk though the directories
     for path, dirs, files in os.walk(os.path.abspath(directory)):
         # Read each file

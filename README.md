@@ -1,12 +1,12 @@
 # Zcoder
 
 # Summary
-ZCoder encodes Unicode .txt files as "Z-Code" and convertes them back by means of two Python functions. 
-Z-Code is a made up name for a purely alphabetic equivalent to Python's four-digit Unicode escape 
-sequences. All numbers are converted to their spellings wrapped in the letter "z" (e.g. "1" becomes "zonez", 
-"2" becomes "ztwoz", etc.). The initial "\u" becomes "qq".
+Zcoder encodes Unicode `.txt` files as "z-Code" and converts them back to Unicode. 
 
-The rationale for z-code is that I was unable to process Chinese characters using the [http://mallet.cs.umass.edu](MALLET) 
+Z-Code is a made up name for a purely alphabetic equivalent to Python's four-digit Unicode escape sequences. All numbers are converted to their spellings wrapped in the letter "z" (e.g. "1" becomes "zonez", 
+"2" becomes "ztwoz", etc.). The exceptions are "0", which becomes "zqeroz" and initial "\u", which becomes "qq".
+
+The rationale for z-code is that I was unable to process Classical Chinese characters using the [http://mallet.cs.umass.edu](MALLET) 
 topic modelling tool. By converting my texts to z-code, running them through MALLET, and then converting MALLET's 
 output back to Unicode, I was able to achieve my desired results. Zcoder may be useful for piping text files into 
 other tools where Unicode may create a processing challenge.
